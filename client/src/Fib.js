@@ -28,8 +28,7 @@ export default class Fib extends Component {
     }
 
     renderSeenIndexes() {
-        return ''
-        // return this.state.seenIndexes.map(index => index.number).join(', ')
+        return this.state.seenIndexes.map(index => index.number).join(', ')
     }
 
     renderValues() {
