@@ -36,32 +36,32 @@ jobs:
         docker push kofimorrison/multi-client
         docker push kofimorrison/multi-server
         docker push kofimorrison/multi-worker
-  # setup-and-deploy:
-  #   needs: publish-to-hub
-  #   name: Setup and Deploy to k8s
-  #   runs-on: ubuntu-latest
+  setup-and-deploy:
+    needs: publish-to-hub
+    name: Setup and Deploy to k8s
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   # Setup gcloud CLI
-  #   - uses: google-github-actions/setup-gcloud@master
-  #     with:
-  #       service_account_key: ${{ secrets.GKE_SA_KEY }}
-  #       project_id: ${{ secrets.GKE_PROJECT }}
+    # Setup gcloud CLI
+    - uses: google-github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{ secrets.GKE_SA_KEY }}
+        project_id: ${{ secrets.GKE_PROJECT }}
 
-  #   # Get the GKE credentials so we can deploy to the cluster
-  #   - run: |-
-  #       gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
-  #   # Deploy sample image to the GKE cluster
-  #   - name: Get the version
-  #     id: vars
-  #     run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:10})
-  #   - name: Deploy
-  #     run: |-
-  #       kubectl apply -f k8s/
-  #       kubectl set image deployments/server-deployment server=kofimorrison/multi-server:${{steps.vars.outputs.tag}}
-  #       kubectl set image deployments/client-deployment client=kofimorrison/multi-client:${{steps.vars.outputs.tag}}
-  #       kubectl set image deployments/worker-deployment worker=kofimorrison/multi-worker:${{steps.vars.outputs.tag}}
-  #       kubectl get services -o wide
+    # Get the GKE credentials so we can deploy to the cluster
+    - run: |-
+        gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
+    # Deploy sample image to the GKE cluster
+    # - name: Get the version
+    #   id: vars
+    #   run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:10})
+    # - name: Deploy
+    #   run: |-
+    #     kubectl apply -f k8s/
+    #     kubectl set image deployments/server-deployment server=kofimorrison/multi-server:${{steps.vars.outputs.tag}}
+    #     kubectl set image deployments/client-deployment client=kofimorrison/multi-client:${{steps.vars.outputs.tag}}
+    #     kubectl set image deployments/worker-deployment worker=kofimorrison/multi-worker:${{steps.vars.outputs.tag}}
+    #     kubectl get services -o wide
