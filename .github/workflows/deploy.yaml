@@ -1,38 +1,68 @@
-name: Deploy Multi Image App
+name: Deploy React app to GKE
+
 on:
-  push:
-    branches:
-      - "master"
- 
+  workflow_run:
+    workflows: [unit tests]
+    branches: [master]
+    types: [completed]
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: multi-cluster
+  GKE_ZONE: europe-west3-b
+  SHA: ${ GITHUB_SHA:10 }
+
 jobs:
-  build:
+  publish-to-hub:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Publish to dockerhub
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker build -t kofimorrison/react-test -f ./client/Dockerfile.dev ./client
-        
-      # - run: docker run -e CI=true kofimorrison/react-test npm test
-      # - run: docker build -t kofimorrison/multi-client ./client 
-      # - run: docker build -t kofimorrison/multi-nginx ./nginx 
-      # - run: docker build -t kofimorrison/multi-server ./server
-      # - run: docker build -t kofimorrison/multi-worker ./worker
-      # - run: docker push kofimorrison/multi-client
-      # - run: docker push kofimorrison/multi-nginx
-      # - run: docker push kofimorrison/multi-server
-      # - run: docker push kofimorrison/multi-worker
-        
-      # - name: Generate deployment package
-      #   run: zip -r deploy.zip . -x '*.git*'
- 
-      # - name: Deploy to EB
-      #   uses: einaregilsson/beanstalk-deploy@v18
-      #   with:
-      #     aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-      #     aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-      #     application_name: multi-image-docker
-      #     environment_name: Multiimagedocker-env
-      #     existing_bucket_name: elasticbeanstalk-eu-central-1-584336754720
-      #     region: eu-central-1
-      #     version_label: ${{ github.sha }}
-      #     deployment_package: deploy.zip
+    - uses: actions/checkout@v2
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Get the version
+      id: vars
+      run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:10})
+    - name: Running deploy script
+      run: |-
+        docker build -t kofimorrison/multi-client ./client 
+        docker build -t kofimorrison/multi-server ./server
+        docker build -t kofimorrison/multi-worker ./worker
+        docker push kofimorrison/multi-client
+        docker push kofimorrison/multi-nginx
+        docker push kofimorrison/multi-server
+        docker push kofimorrison/multi-worker
+  # setup-and-deploy:
+  #   needs: publish-to-hub
+  #   name: Setup and Deploy to k8s
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
+
+  #   # Setup gcloud CLI
+  #   - uses: google-github-actions/setup-gcloud@master
+  #     with:
+  #       service_account_key: ${{ secrets.GKE_SA_KEY }}
+  #       project_id: ${{ secrets.GKE_PROJECT }}
+
+  #   # Get the GKE credentials so we can deploy to the cluster
+  #   - run: |-
+  #       gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
+  #   # Deploy sample image to the GKE cluster
+  #   - name: Get the version
+  #     id: vars
+  #     run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:10})
+  #   - name: Deploy
+  #     run: |-
+  #       kubectl apply -f k8s/
+  #       kubectl set image deployments/server-deployment server=kofimorrison/multi-server:${{steps.vars.outputs.tag}}
+  #       kubectl set image deployments/client-deployment client=kofimorrison/multi-client:${{steps.vars.outputs.tag}}
+  #       kubectl set image deployments/worker-deployment worker=kofimorrison/multi-worker:${{steps.vars.outputs.tag}}
+  #       kubectl get services -o wide
