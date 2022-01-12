@@ -30,9 +30,9 @@ jobs:
       run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:10})
     - name: Running deploy script
       run: |-
-        docker build -t kofimorrison/multi-client:latest -t kofimorrison/client:${{steps.vars.outputs.tag}} -f ./client/Dockerfile ./client 
-        docker build -t kofimorrison/multi-server:latest -t kofimorrison/server:${{steps.vars.outputs.tag}} -f ./client/Dockerfile ./client
-        docker build -t kofimorrison/multi-worker:latest -t kofimorrison/worker:${{steps.vars.outputs.tag}} -f ./client/Dockerfile ./client
+        docker build -t kofimorrison/multi-client:latest -t kofimorrison/multi-client:${{steps.vars.outputs.tag}} -f ./client/Dockerfile ./client 
+        docker build -t kofimorrison/multi-server:latest -t kofimorrison/multi-server:${{steps.vars.outputs.tag}} -f ./server/Dockerfile ./server
+        docker build -t kofimorrison/multi-worker:latest -t kofimorrison/multi-worker:${{steps.vars.outputs.tag}} -f ./worker/Dockerfile ./worker
         docker push kofimorrison/multi-client:latest
         docker push kofimorrison/multi-server:latest
         docker push kofimorrison/multi-worker:latest
