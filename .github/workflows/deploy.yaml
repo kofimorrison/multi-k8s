@@ -54,7 +54,6 @@ jobs:
       with:
         service-account-key: ${{ secrets.GKE_SA_KEY }}
         project: ${{ secrets.GKE_PROJECT }}
-        confgure-docker: true
 
     # Get the GKE credentials so we can deploy to the cluster
     - run: |-
