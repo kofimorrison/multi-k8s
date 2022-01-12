@@ -34,7 +34,6 @@ jobs:
         docker build -t kofimorrison/multi-server ./server
         docker build -t kofimorrison/multi-worker ./worker
         docker push kofimorrison/multi-client
-        docker push kofimorrison/multi-nginx
         docker push kofimorrison/multi-server
         docker push kofimorrison/multi-worker
   # setup-and-deploy:
