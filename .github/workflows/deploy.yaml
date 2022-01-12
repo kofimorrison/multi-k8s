@@ -58,13 +58,13 @@ jobs:
     - run: |-
         gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
     # Deploy sample image to the GKE cluster
-    # - name: Get the version
-    #   id: vars
-    #   run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:10})
-    # - name: Deploy
-    #   run: |-
-    #     kubectl apply -f k8s/
-    #     kubectl set image deployments/server-deployment server=kofimorrison/multi-server:${{steps.vars.outputs.tag}}
-    #     kubectl set image deployments/client-deployment client=kofimorrison/multi-client:${{steps.vars.outputs.tag}}
-    #     kubectl set image deployments/worker-deployment worker=kofimorrison/multi-worker:${{steps.vars.outputs.tag}}
-    #     kubectl get services -o wide
+    - name: Get the version
+      id: vars
+      run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:10})
+    - name: Deploy
+      run: |-
+        kubectl apply -f k8s/
+        kubectl set image deployments/server-deployment server=kofimorrison/multi-server:${{steps.vars.outputs.tag}}
+        kubectl set image deployments/client-deployment client=kofimorrison/multi-client:${{steps.vars.outputs.tag}}
+        kubectl set image deployments/worker-deployment worker=kofimorrison/multi-worker:${{steps.vars.outputs.tag}}
+        kubectl get services -o wide
