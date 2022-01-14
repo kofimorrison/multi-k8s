@@ -17,6 +17,9 @@ spec:
         image: kofimorrison/multi-server
         imagePullPolicy: Always
         resources:
+          requests:
+            memory: "64Mi"
+            cpu: "2000m"
           limits:
             memory: "128Mi"
             cpu: "500m"
